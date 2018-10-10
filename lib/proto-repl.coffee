@@ -126,6 +126,7 @@ module.exports = ProtoRepl =
       'proto-repl:start-self-hosted-repl': => @selfHostedRepl()
       'proto-repl:clear-repl': => @clearRepl()
       'proto-repl:toggle-auto-scroll': => @toggleAutoScroll()
+      'proto-repl:execute-all-text': => @executeAllText()
       'proto-repl:execute-selected-text': => @executeSelectedText()
       'proto-repl:execute-block': => @executeBlock()
       'proto-repl:execute-top-block': => @executeBlock({topLevel: true})
@@ -346,6 +347,25 @@ module.exports = ProtoRepl =
       if ns
         options.ns = ns
       @executeCode(code, options)
+
+  # Executes the all the code in a file.
+  # Valid options:
+  # * resultHandler - a callback function to invoke with the value that was read.
+  #   If this is passed in then the value will not be displayed in the REPL.
+  executeAllText: (options={})->
+    if editor = atom.workspace.getActiveTextEditor()
+      text = editor.getText()
+      range = {
+        end: {column: Infinity, row: Infinity}
+        start: {column: 0, row: 0}
+      }
+      options.inlineOptions =
+        editor: editor
+        range: range
+      options.displayCode = text
+      options.doBlock = true
+      @executeCodeInNs(text, options)
+
 
   # Executes the selected code.
   # Valid options:
